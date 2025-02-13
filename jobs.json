@@ -1,0 +1,22 @@
+{
+    "Software Engineer": {
+        "specs": "Proficient in Java, Python, and C++ with experience in full-stack development.",
+        "reqs": "5+ years of experience in software development, expertise in web and mobile applications."
+    },
+    "Data Scientist": {
+        "specs": "Strong background in machine learning, statistics, and data analysis.",
+        "reqs": "3+ years of experience in data science, knowledge of Python, R, and SQL."
+    },
+    "Product Manager": {
+        "specs": "Experience in managing product development from concept to launch, skilled in cross-functional team collaboration.",
+        "reqs": "More than 5 years of experience in product management, excellent communication and leadership skills."
+    },
+    "UX Designer": {
+        "specs": "Proficient in user research, wireframing, and prototyping with a focus on user experience.",
+        "reqs": "3+ years of experience in UX design, knowledge of design tools like Sketch, Figma, and Adobe XD."
+    },
+    "Machine Learning Engineer": {
+        "specs": "Experience in designing and implementing machine learning models, familiar with TensorFlow and PyTorch.",
+        "reqs": "4+ years of experience in machine learning, strong background in mathematics and statistics."
+    }
+}

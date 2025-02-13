@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Screening</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f9f9f9;
+            text-align: center;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        h3 {
+            color: #333;
+        }
+
+        #results {
+            background-color: #e7e7e7;
+            padding: 20px;
+            border-radius: 8px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-width: 500px;
+            margin: 20px auto;
+            text-align: left;
+        }
+
+        /* Loader animation */
+        .loader {
+            display: none;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #4CAF50;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Toast notification */
+        .toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            border-radius: 4px;
+            padding: 10px;
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1;
+        }
+
+        .toast.show {
+            visibility: visible;
+            animation: fadeInOut 3s;
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0; }
+            10%, 90% { opacity: 1; }
+        }
+
+        /* Result section formatting */
+        .result-section {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .result-section strong {
+            display: block;
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 3px;
+        }
+
+        .result-section p, .result-section span {
+            background-color: #f1f1f1;
+            padding: 8px;
+            border-radius: 4px;
+            display: block;
+        }
+
+        .error {
+            color: red;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        /* Fade-in effect for results */
+        .fade-in {
+            animation: fadeIn 0.8s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(-10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Upload Resume for Screening</h2>
+
+    <form id="upload-form" enctype="multipart/form-data">
+        <input type="file" id="resume" name="resume" accept="application/pdf" required>
+
+        <label for="job-description">Job Role</label>
+        <select id="job-description" name="job_description" required>
+            <option value="">Select a Job Role</option>
+        </select>
+
+        <div id="custom-role-container" style="display: none;">
+            <label for="custom-role">Custom Job Role</label>
+            <input type="text" id="custom-role" placeholder="Enter Custom Job Role">
+        </div>
+
+        <label for="specs">Job Specifications</label>
+        <input type="text" id="specs" name="specs" required>
+
+        <label for="reqs">Job Requirements</label>
+        <input type="text" id="reqs" name="reqs" required>
+
+        <button type="submit">Upload & Analyze</button>
+    </form>
+
+    <div class="loader" id="loader"></div>
+
+    <h3>Results</h3>
+    <div id="results"></div>
+
+    <div class="toast" id="toast">Fields auto-filled. You can edit them!</div>
+
+    <script>
+        let jobRoles = {};
+
+        async function loadJobRoles() {
+            const response = await fetch("jobs.json");
+            jobRoles = await response.json();
+
+            const jobDropdown = document.getElementById("job-description");
+            Object.keys(jobRoles).forEach(job => {
+                const option = document.createElement("option");
+                option.value = job;
+                option.textContent = job;
+                jobDropdown.appendChild(option);
+            });
+
+            // Add "Other" option
+            const otherOption = document.createElement("option");
+            otherOption.value = "Other";
+            otherOption.textContent = "Other (Enter Manually)";
+            jobDropdown.appendChild(otherOption);
+        }
+
+        function updateJobDetails() {
+            const selectedRole = document.getElementById("job-description").value;
+            const specsField = document.getElementById("specs");
+            const reqsField = document.getElementById("reqs");
+            const customRoleContainer = document.getElementById("custom-role-container");
+
+            if (selectedRole === "Other") {
+                customRoleContainer.style.display = "block";
+                specsField.value = "";
+                reqsField.value = "";
+            } else {
+                customRoleContainer.style.display = "none";
+                if (jobRoles[selectedRole]) {
+                    specsField.value = jobRoles[selectedRole].specs;
+                    reqsField.value = jobRoles[selectedRole].reqs;
+                    showToast();
+                }
+            }
+        }
+
+        function showToast() {
+            const toast = document.getElementById("toast");
+            toast.classList.add("show");
+            setTimeout(() => toast.classList.remove("show"), 3000);
+        }
+
+        document.getElementById("job-description").addEventListener("change", updateJobDetails);
+        loadJobRoles();
+
+        document.getElementById("upload-form").addEventListener("submit", async function (event) {
+            event.preventDefault();
+            document.getElementById("loader").style.display = "block";
+
+            const formData = new FormData();
+            formData.append("file", document.getElementById("resume").files[0]);
+            formData.append("job_description", document.getElementById("job-description").value);
+            formData.append("specs", document.getElementById("specs").value);
+            formData.append("reqs", document.getElementById("reqs").value);
+
+            try {
+                const response = await fetch("http://localhost:8000/process_resume/", {
+                    method: "POST",
+                    body: formData
+                });
+
+                document.getElementById("loader").style.display = "none";
+
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (result.error) {
+                    document.getElementById("results").innerHTML = `<div class="error">❌ <strong>Error:</strong> ${result.error}</div>`;
+                } else {
+                    // Display structured results
+                    document.getElementById("results").innerHTML = `
+                        <div class="result-section"><strong>Match Score:</strong> <span>${result.match_score}/100</span></div>
+                        <div class="result-section"><strong>Strengths:</strong> <p>${result.strengths}</p></div>
+                        <div class="result-section"><strong>Gaps:</strong> <p>${result.gaps}</p></div>
+                    `;
+
+                    document.getElementById("results").classList.add("fade-in"); // Apply fade-in effect
+                }
+            } catch (error) {
+                document.getElementById("loader").style.display = "none";
+                document.getElementById("results").innerHTML = `<div class="error">❌ <strong>Error:</strong> ${error.message}</div>`;
+            }
+        });
+    </script>
+</body>
+</html>
